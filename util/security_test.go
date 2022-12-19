@@ -72,7 +72,7 @@ func TestVerifyCommonNameAndRotate(t *testing.T) {
 	serverTLS, err := util.NewTLSConfig(
 		util.WithCAContent(caData),
 		util.WithCertAndKeyContent(serverCert, serverKey),
-		util.WithVerifyCommonName([]string{"client1"}),
+		util.WithVerifyCommonName([]string{"server", "client1"}),
 	)
 	require.NoError(t, err)
 	port := 9292
@@ -87,9 +87,10 @@ func TestVerifyCommonNameAndRotate(t *testing.T) {
 	clientTLS1, err := util.NewTLSConfig(
 		util.WithCAContent(caData),
 		util.WithCertAndKeyContent(client1Cert, client1Key),
+		util.WithVerifyCommonName([]string{"server", "client1"}),
 	)
 	require.NoError(t, err)
-	resp, err := util.ClientWithTLS(clientTLS1).Get(url)
+	resp, err := util.ClientWithTLS(clientTLS1).Get(url) // fail here, client certificate authentication failed. The Common Name from the client certificate [] was not found in the configuration cluster-verify-cn with value: [server client1]
 	require.NoError(t, err)
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
